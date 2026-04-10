@@ -33,13 +33,31 @@ class AppConfig:
 
 def load_config(path: str | Path) -> AppConfig:
     config_path = Path(path)
-    data: dict[str, Any] = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    loaded = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    if loaded is None:
+        data: dict[str, Any] = {}
+    elif isinstance(loaded, dict):
+        data = loaded
+    else:
+        raise ValueError("config root must be a mapping/object")
 
-    search = SearchConfig(**(data.get("search") or {}))
-    crawl = CrawlConfig(**(data.get("crawl") or {}))
+    search_data = data.get("search") or {}
+    crawl_data = data.get("crawl") or {}
     source_urls = data.get("source_urls") or []
+
+    if not isinstance(search_data, dict):
+        raise ValueError("search must be a mapping/object")
+    if not isinstance(crawl_data, dict):
+        raise ValueError("crawl must be a mapping/object")
+    if not isinstance(source_urls, list) or any(not isinstance(url, str) for url in source_urls):
+        raise ValueError("source_urls must be a list of strings")
+
+    search = SearchConfig(**search_data)
+    crawl = CrawlConfig(**crawl_data)
 
     if search.queries is None:
         search.queries = []
+    elif not isinstance(search.queries, list) or any(not isinstance(query, str) for query in search.queries):
+        raise ValueError("search.queries must be a list of strings")
 
     return AppConfig(search=search, crawl=crawl, source_urls=source_urls)
