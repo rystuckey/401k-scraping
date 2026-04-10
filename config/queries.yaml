@@ -1,0 +1,73 @@
+search:
+  gl: us
+  hl: en
+  default_results_per_query: 8
+  queries:
+    - procurement.opengov.com 457 401 recordkeeping deferred compensation RFP proposals due
+    - procurement.opengov.com retirement plan consulting investment advisory RFP solicitation
+    - procurement.opengov.com 403b third party administration retirement plan RFP
+    - city 457 deferred compensation recordkeeper RFP proposals due 2025 2026
+    - county 457b 401a recordkeeping retirement plan RFP solicitation 2025 2026
+    - municipality retirement plan recordkeeping services RFP deadline 2025 2026
+    - state government 457 deferred compensation plan recordkeeper RFP 2025 2026
+    - public employee retirement defined contribution recordkeeper solicitation RFP 2025 2026
+    - government retirement plan third party administrator RFP proposals due 2025 2026
+    - stable value fund manager search RFP defined contribution pension 2025 2026
+    - target date fund manager search defined contribution plan RFP 2025 2026
+    - investment consultant defined contribution advisory services RFP 2025 2026
+    - police fire public safety retirement plan recordkeeping RFP 2025 2026
+    - university endowment 403b defined contribution recordkeeper RFP proposals 2025 2026
+    - nonprofit foundation 403b retirement plan administrator RFP proposals 2025 2026
+    - highergov.com 457 401 recordkeeping retirement plan solicitation 2025 2026
+    - highergov state local government retirement plan recordkeeper RFP 2025 2026
+    - defined contribution recordkeeping services procurement solicitation deadline 2025 2026
+    - retirement plan services vendor selection RFP government pension 2025 2026
+    - site:.gov (RFP OR "request for proposals" OR solicitation) (401k OR "401(k)" OR 403b OR "403(b)" OR 457b OR "457(b)") (recordkeeper OR recordkeeping OR "retirement plan") filetype:pdf (2026 OR "Jan 1 2026" OR "January 1, 2026")
+    - site:.gov (RFP OR "request for proposals") ("governmental 457(b)" OR "457(b)" OR "deferred compensation") (recordkeeping OR recordkeeper OR TPA) filetype:pdf -pension -fire -police
+    - site:.gov filetype:pdf (RFP OR "request for proposals") ("3(38)" OR "ERISA 3(38)" OR "investment manager") (401k OR "401(k)" OR 403b OR "403(b)") -IPS -minutes
+    - site:.gov filetype:(pdf OR doc OR docx) (RFP OR "request for proposals") ("SECURE 2.0" OR "secure 2.0") ("Roth catch-up" OR "Roth catch up" OR "section 603")
+    - site:.gov (inurl:procurement OR inurl:purchasing OR inurl:bids OR inurl:rfp OR inurl:solicitations) (401k OR "401(k)" OR 403b OR "403(b)" OR "retirement plan") (RFP OR "request for proposals") -construction
+    - site:.us (city OR county OR municipality OR "board of education") (RFP OR "request for proposals") (401k OR "401(k)" OR 403b OR "403(b)" OR 457b OR "457(b)") (recordkeeper OR "retirement services") filetype:pdf
+    - (site:.k12.ca.us OR site:.k12.il.us OR site:.k12.tx.us OR inurl:k12) (RFP OR "request for proposals") (403b OR "403(b)" OR "retirement plan") (recordkeeper OR "plan administration" OR TPA) (filetype:pdf OR filetype:doc OR filetype:docx)
+    - site:caleprocure.ca.gov (solicitation OR event OR "bid opportunity") (401k OR "401(k)" OR 403b OR "403(b)" OR "retirement plan" OR recordkeeping) -construction
+    - site:bidbuy.illinois.gov (openBids OR bidDetail OR advancedSearch) (recordkeeping OR recordkeeper OR "retirement plan" OR 401k OR 403b) (RFP OR solicitation)
+    - site:procurement.opengov.com inurl:project-list (401k OR "401(k)" OR 403b OR "403(b)" OR 457b OR "deferred compensation" OR recordkeeper) ("RFP" OR solicitation)
+    - (site:vendors.planetbids.com OR site:pbsystem.planetbids.com) (Bid OR "Bid Opportunities" OR RFP) (401k OR "401(k)" OR 403b OR "403(b)" OR "retirement plan" OR recordkeeping)
+    - site:publicpurchase.com (bid OR bids OR solicitation OR RFP) (401k OR "401(k)" OR 403b OR "403(b)" OR 457b OR "retirement plan" OR recordkeeping) -reverse -auction
+    - (site:demandstar.com OR site:network.demandstar.com) (RFP OR bids OR solicitation) (401k OR "401(k)" OR 403b OR "403(b)" OR "retirement plan" OR recordkeeper) (2026 OR "secure 2.0" OR "Roth catch-up")
+    - ("request for proposals" OR RFP) ("401(k)" OR 401k OR "403(b)" OR 403b) ("Roth catch-up" OR "SECURE 2.0" OR "section 603") filetype:pdf -irs -regulations
+    - site:.edu (RFP OR "request for proposals" OR solicitation) (403b OR "403(b)" OR "retirement plan") (recordkeeper OR recordkeeping OR "plan administration" OR TPA) filetype:pdf (2026 OR "SECURE 2.0" OR "Roth catch-up")
+    - site:.edu (inurl:procurement OR inurl:purchasing OR inurl:sourcing OR inurl:bids) (RFP OR "request for proposals") ("retirement plan" OR 401k OR 403b OR recordkeeping)
+    - site:.edu filetype:(doc OR docx OR pdf) (RFP OR "request for proposal") ("investment adviser" OR "investment advisor" OR consultant) ("3(38)" OR "discretionary") (401k OR 403b OR "defined contribution")
+    - site:.edu intitle:(RFP OR "Request for Proposals") ("recordkeeping services" OR recordkeeper OR "retirement services") (401k OR 403b OR "defined contribution")
+    - site:.edu ("request for proposals" OR RFP) ("403(b)" OR 403b) ("custodial" OR "custodial account" OR "annuity provider") filetype:pdf
+    - site:.edu ("SECURE 2.0" OR "Roth catch-up" OR "section 603") ("vendor" OR "recordkeeper" OR "plan administrator") (RFP OR "request for proposals")
+
+crawl:
+  max_follow_links_per_page: 10
+  max_pdf_links_per_page: 4
+  capture_network_requests: true
+  capture_console_messages: false
+  accept_downloads: true
+
+source_urls:
+  - https://www.callan.com/rfps/
+  - https://www.nepc.com/advertised-searches/
+  - https://www.calpers.ca.gov/search/site?keys=rfp
+  - https://www.mass.gov/info-details/retirement-board-request-for-proposal-rfp-notices
+  - https://www.lacera.com/who-we-are/business-opportunities
+  - https://comptroller.nyc.gov/services/for-businesses/doing-business-with-the-comptroller/rfps-solicitations/
+  - https://www.imrf.org/en/about-imrf/procurement/open-rfps
+  - https://www.calstrs.com/investment-solicitations
+  - https://www.trs.texas.gov/procurement
+  - https://www.sparkinstitute.org/news/
+  - https://www.highergov.com/contract-opportunity/?naics=523130&q=recordkeeping+retirement
+  - https://www.nasra.org/jobs_search.asp?proc=y
+  - https://www.highergov.com/sl/contract-opportunity/?searchID=UAI-i2MmiIKWclMLr5aDp
+  - https://alpha.sam.gov/find-contract-opportunities
+  - https://naspovaluepoint.org/solicitation-status/
+  - https://caleprocure.ca.gov/pages/
+  - https://www.bidbuy.illinois.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true
+  - https://procurement.opengov.com/login
+  - https://home.planetbids.com/vendor-basic
+  - https://www.publicpurchase.com/gems/register/vendor/register

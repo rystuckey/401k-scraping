@@ -1,0 +1,7 @@
+requests>=2.32.0
+PyYAML>=6.0.1
+python-dotenv>=1.0.1
+beautifulsoup4>=4.12.3
+pypdf>=5.4.0
+crawl4ai>=0.8.0; python_version < "3.14"
+anthropic>=0.40.0

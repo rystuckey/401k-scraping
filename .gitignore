@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+data/raw/pages/
+data/raw/pdfs/
+data/raw/search/
+data/processed/
