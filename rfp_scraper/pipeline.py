@@ -1,21 +1,21 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
 from .crawler import Crawl4AIClient
-from .extract import (
+from .extract_enhanced import (
     domain_for,
-    extract_due_date,
+    extract_due_date_strict,
     extract_size_signal,
     guess_organization,
     is_pdf_url,
     likely_rfp_from_parts,
     pick_pdf_links,
 )
+from .filters import apply_filtering_pipeline, enrich_candidate_with_status
 from .models import CandidateRecord, SearchHit, utc_now_iso
 from .serper import SerperClient
 from .storage import ensure_dir, stable_name, write_bytes, write_csv, write_json, write_jsonl, write_text
@@ -29,7 +29,11 @@ class RFPPipeline:
         self.pages_dir = ensure_dir(self.root_dir / "data" / "raw" / "pages")
         self.pdfs_dir = ensure_dir(self.root_dir / "data" / "raw" / "pdfs")
         self.processed_dir = ensure_dir(self.root_dir / "data" / "processed")
-        self.serper = SerperClient(gl=config.search.gl, hl=config.search.hl)
+        self.serper = SerperClient(
+            gl=config.search.gl,
+            hl=config.search.hl,
+            recency_tbs=config.search.recency_tbs,
+        )
         self.crawler = Crawl4AIClient(
             downloads_dir=self.pages_dir / "downloads",
             capture_network_requests=config.crawl.capture_network_requests,
@@ -72,14 +76,25 @@ class RFPPipeline:
         if crawl_limit is not None:
             deduped_hits = deduped_hits[:crawl_limit]
 
-        records: list[dict[str, Any]] = []
+        records: list[CandidateRecord] = []
         for hit in deduped_hits:
             record = await self._process_hit(hit)
-            records.append(record.to_dict())
-
-        write_jsonl(self.processed_dir / "candidates.jsonl", records)
-        write_csv(self.processed_dir / "candidates.csv", [self._flatten_record(row) for row in records])
-        return records
+            records.append(enrich_candidate_with_status(record, snippet_text=hit.snippet))
+        
+        # Apply filtering to exclude closed/expired RFPs and validate dates
+        filtered_records = apply_filtering_pipeline(
+            records,
+            exclude_closed=True,
+            exclude_past_deadlines=True,
+            sort_by_urgency=True,
+        )
+        
+        # Convert to dicts for output
+        output_records = [r.to_dict() for r in filtered_records]
+        
+        write_jsonl(self.processed_dir / "candidates.jsonl", output_records)
+        write_csv(self.processed_dir / "candidates.csv", [self._flatten_record(row) for row in output_records])
+        return output_records
 
     def _dedupe_hits(self, hits: list[SearchHit]) -> list[SearchHit]:
         seen: set[str] = set()
@@ -133,7 +148,7 @@ class RFPPipeline:
                 snippet=hit.snippet,
                 likely_rfp=likely_rfp_from_parts(hit.title, hit.snippet, combined_text),
                 organization_guess=guess_organization(hit.title, page.get("metadata"), hit.link),
-                due_date_guess=extract_due_date(combined_text),
+                due_date_guess=extract_due_date_strict(combined_text),
                 size_signal_guess=extract_size_signal(combined_text),
                 page_status_code=page.get("status_code"),
                 page_metadata=page.get("metadata", {}),
@@ -196,7 +211,7 @@ class RFPPipeline:
                 snippet=hit.snippet,
                 likely_rfp=likely_rfp_from_parts(hit.title, hit.snippet, combined_text),
                 organization_guess=guess_organization(hit.title, pdf_result.get("metadata"), hit.link),
-                due_date_guess=extract_due_date(combined_text),
+                due_date_guess=extract_due_date_strict(combined_text),
                 size_signal_guess=extract_size_signal(combined_text),
                 page_status_code=pdf_result.get("status_code"),
                 page_metadata=pdf_result.get("metadata", {}),

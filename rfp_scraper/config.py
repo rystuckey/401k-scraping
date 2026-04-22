@@ -11,6 +11,7 @@ import yaml
 class SearchConfig:
     gl: str = "us"
     hl: str = "en"
+    recency_tbs: str = ""
     default_results_per_query: int = 8
     queries: list[str] | None = None
 

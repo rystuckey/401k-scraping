@@ -9,14 +9,30 @@ from .models import SearchHit
 
 
 class SerperClient:
-    def __init__(self, api_key: str | None = None, gl: str = "us", hl: str = "en") -> None:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        gl: str = "us",
+        hl: str = "en",
+        recency_tbs: str = "",
+    ) -> None:
         self.api_key = api_key or os.getenv("SERPER_API_KEY", "")
         self.gl = gl
         self.hl = hl
+        self.recency_tbs = recency_tbs.strip()
 
     def search(self, query: str, num: int = 8) -> tuple[list[SearchHit], dict[str, Any]]:
         if not self.api_key:
             raise RuntimeError("SERPER_API_KEY is required to run search queries.")
+
+        payload: dict[str, Any] = {
+            "q": query,
+            "gl": self.gl,
+            "hl": self.hl,
+            "num": num,
+        }
+        if self.recency_tbs:
+            payload["tbs"] = self.recency_tbs
 
         response = requests.post(
             "https://google.serper.dev/search",
@@ -24,12 +40,7 @@ class SerperClient:
                 "X-API-KEY": self.api_key,
                 "Content-Type": "application/json",
             },
-            json={
-                "q": query,
-                "gl": self.gl,
-                "hl": self.hl,
-                "num": num,
-            },
+            json=payload,
             timeout=60,
         )
         response.raise_for_status()

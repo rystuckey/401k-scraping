@@ -43,6 +43,9 @@ class CandidateRecord:
     metadata_path: str
     links_path: str
     pdf_records: list[dict[str, Any]]
+    rfp_status: str = "unknown"  # 'open', 'closed', or 'unknown'
+    due_date_valid: bool = False  # True if due_date is in future and valid
+    recency_score: float = 0.0  # 0.0-1.0, higher = sooner deadline
     error: str = ""
 
     def to_dict(self) -> dict[str, Any]:
