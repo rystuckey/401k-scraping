@@ -1,0 +1,52 @@
+name: Daily 401k RFP scrape
+
+on:
+  schedule:
+    - cron: '0 13 * * *' # 13:00 UTC = 8am Chicago (CDT)
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper (scrape-only)
+        env:
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+        run: python main.py run --crawl-limit 200
+
+      - name: Build Relay JSONL payload
+        run: |
+          jq -c '{
+            url: (.final_url // .source_url // ""),
+            organization: (.organization_guess // ""),
+            domain: (.domain // ""),
+            due_date_guess: (.due_date_guess // ""),
+            rfp_status: (.rfp_status // "unknown"),
+            likely_rfp: (.likely_rfp // false),
+            recency_score: (.recency_score // 0),
+            size: (.size_signal_guess // ""),
+            confidence: (
+              if (.likely_rfp == true and (.rfp_status // "") == "open" and (.due_date_valid == true)) then "high"
+              elif (.likely_rfp == true) then "medium"
+              else "low"
+              end
+            )
+          }' data/processed/candidates.jsonl > rfps.jsonl
+
+      - name: Send to Relay
+        env:
+          RELAY_WEBHOOK_URL: ${{ secrets.RELAY_WEBHOOK_URL }}
+        run: |
+          jq -s '{payload: {rfps: .}}' rfps.jsonl > body.json
+          curl -X POST "$RELAY_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            --data-binary @body.json

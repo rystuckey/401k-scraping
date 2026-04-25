@@ -28,15 +28,10 @@ import argparse
 import json
 import os
 import sys
+from typing import Any
 from pathlib import Path
 
 from dotenv import load_dotenv
-
-try:
-    import anthropic
-except ImportError:
-    print("anthropic package not installed. Run: pip install anthropic")
-    sys.exit(1)
 
 load_dotenv()
 
@@ -113,7 +108,7 @@ def build_evidence(record: dict) -> str:
     return "\n".join(parts)
 
 
-def extract_record(client: anthropic.Anthropic, record: dict, model: str) -> dict:
+def extract_record(client: Any, record: dict, model: str) -> dict:
     evidence = build_evidence(record)
     message = client.messages.create(
         model=model,
@@ -149,6 +144,19 @@ def run(
     limit: int | None,
     only_likely_rfp: bool,
 ) -> None:
+    llm_enabled = os.getenv("ENABLE_ANTHROPIC_LLM", "0").strip().lower() in {"1", "true", "yes", "y"}
+    if not llm_enabled:
+        print(
+            "LLM extraction is disabled by default. Set ENABLE_ANTHROPIC_LLM=1 to enable this script."
+        )
+        sys.exit(1)
+
+    try:
+        import anthropic
+    except ImportError:
+        print("anthropic package not installed. Run: pip install anthropic")
+        sys.exit(1)
+
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
         print("ANTHROPIC_API_KEY is not set in .env")
