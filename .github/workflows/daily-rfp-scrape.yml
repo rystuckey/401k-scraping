@@ -46,7 +46,7 @@ jobs:
         env:
           RELAY_WEBHOOK_URL: ${{ secrets.RELAY_WEBHOOK_URL }}
         run: |
-          jq -s '{payload: {rfps: .}}' rfps.jsonl > body.json
+          jq -s '{rfps: .}' rfps.jsonl > body.json
           curl -X POST "$RELAY_WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             --data-binary @body.json
