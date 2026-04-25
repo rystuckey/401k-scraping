@@ -46,7 +46,26 @@ jobs:
         env:
           RELAY_WEBHOOK_URL: ${{ secrets.RELAY_WEBHOOK_URL }}
         run: |
-          jq -s '{payload: {rfps: .}}' rfps.jsonl > body.json
+          jq -s '{
+            payload: {
+              rfps: [ .[] | {
+                url,
+                organization,
+                domain,
+                due_date_guess,
+                rfp_status,
+                likely_rfp,
+                recency_score,
+                size,
+                confidence: (
+                  if (.likely_rfp == true and (.rfp_status // "") == "open" and (.due_date_valid == true)) then 0.9
+                  elif (.likely_rfp == true) then 0.6
+                  else 0.2
+                  end
+                )
+              } ]
+            }
+          }' data/processed/candidates.jsonl > body.json
           curl -X POST "$RELAY_WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             --data-binary @body.json
