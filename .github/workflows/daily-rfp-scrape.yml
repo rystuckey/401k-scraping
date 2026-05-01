@@ -1,8 +1,8 @@
-name: Daily 401k RFP scrape
+name: Weekly 401k RFP scrape
 
 on:
   schedule:
-    - cron: '0 13 * * *' # 13:00 UTC = 8am Chicago (CDT)
+    - cron: '0 13 * * 5' # 13:00 UTC every Friday
   workflow_dispatch:
 
 jobs:
